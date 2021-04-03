@@ -1,4 +1,4 @@
-const { NotFound } = require('http-errors');
+const { NotFound, Locked } = require('http-errors');
 const User = require('./user.entity');
 const Post = require('../posts/post.entity');
 const mongoose = require('mongoose');
@@ -60,6 +60,28 @@ class UserService {
 
         user = Object.assign(user, payload);
 
+        return user.save();
+    }
+
+    async isLocked(username) {
+        const user = await User.findOne({username});
+        return user?.isLocked;
+    }
+
+    async addAttempt(username) {
+        const user = await User.findOne({username});
+        user.attempts += 1;
+        if (user.attempts >= 3) {
+            user.isLocked = true
+            await user.save();
+            throw new Locked("The user is locked!");
+        } else {
+            await user.save();
+        }
+    }
+
+    resetAttempts(user) {
+        user.attempts = 0;
         return user.save();
     }
 }

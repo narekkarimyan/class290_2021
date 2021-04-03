@@ -7,6 +7,7 @@ const app = express();
 const users = require('./users/users.controller');
 const auth = require('./auth/auth.controller');
 const posts = require('./posts/posts.controller');
+const admin = require('./users/admin/admin.controller');
 const { writeInFile, readFromFile } = require('./commons/util');
 const { handleError } = require('./commons/middlewares/error-handler.middleware');
 const asyncHandler = require('express-async-handler');
@@ -17,16 +18,17 @@ app.use(cors());
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
 
-// app.use(jwtMiddleware.unless({
-//     path: [
-//         '/auth/login',
-//         { url: '/users', methods: ['POST'] }
-//     ]
-// }));
+app.use(jwtMiddleware.unless({
+    path: [
+        '/auth/login',
+        { url: '/users', methods: ['POST'] }
+    ]
+}));
 
 app.use('/users', users);
 app.use('/auth', auth);
 app.use('/posts', posts);
+app.use('/admin', admin);
 
 app.get('/', (req, res) => {
     res.send("Hello World!");
